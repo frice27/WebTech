@@ -5,6 +5,7 @@
     display: flex;
     position: relative;
 }
+
 .container-list{
     width: 600px;
     height: 270px;
@@ -45,8 +46,12 @@
     border: none;
     position: relative;
 }
-.cookie{
-    margin: 20px;    
+.editable {
+    margin: 20px;
+    cursor: pointer;
+}
+.bought .editable {
+    text-decoration: line-through;
 }
 .tomato{
     display: inline-block;
@@ -68,7 +73,7 @@
 }
 .cookie{
     display: inline-block;
-    width: 150px;   
+   width: 150px;   
     margin-left: 20px;       
 }
 .button, .button-1{
@@ -93,12 +98,12 @@
     font-weight: bolder;
     position: relative;
 }
-.tomato-num-1{    
+.quantity{    
     padding: 5px 10px;
     background-color: rgb(236, 233, 233);
     border-radius: 5px;
 }
-.dicreas, .increas, .dicreas-1{
+.dicreas, .increas{
     margin-left: 55px;
     border-radius: 50%;
     border: none;
@@ -110,7 +115,7 @@
     color: white; 
     position: relative;   
 }
-.dicreas-1{
+.dicreas:disabled {
     opacity: 0.5;
 }
 .increas{
@@ -142,11 +147,11 @@ h2{
 }
 .amount-1{
     text-decoration: line-through;
+   
 }
 hr{
     opacity: 0.2;
 }
-
 
 button[data-tooltip]::after {
     content: attr(data-tooltip);

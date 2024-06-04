@@ -1,68 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css">
-    <title>Document</title>
+    <title>Shopping List</title>
 </head>
-
 <body>
     <div class="container">
-        <div class="container-list">            
-                <input type="text" id="search" name="search" value="Назва товару">
-                <button type="submit" id="but" data-tooltip="Додати товар">Додати</button>            
+        <div class="container-list">
+            <input type="text" id="search" name="search" placeholder="Назва товару">
+            <button type="submit" id="but" data-tooltip="Додати товар">Додати</button>
             <hr>
-            <div class="product">
-                <span class="tomato">Помідори</span>
-                <span class="tomato-num">2</span>
-                <button class="button-1" data-tooltip="Помічене як некуплене">Не куплено</button>                
+            <div id="product-list">
+              
             </div>
-            <hr>
-            <div class="product">
-                <span class="cookie">Печиво</span>
-                <button class="dicreas" data-tooltip="Зменшити кількість">-</button>
-                <span class="tomato-num-1">2</span>
-                <button class="increas" data-tooltip="Збільшити кількість">+</button>
-                <button class="button" data-tooltip="Помічено як куплене">Куплено</button>
-                <button class="esc" data-tooltip="Видалити товар">&#215;</button>
-            </div>
-            <hr>
-            <div class="product">
-                <span class="cookie">Сир</span>
-                <button class="dicreas-1" data-tooltip="Зменшити кількість">-</button>
-                <span class="tomato-num-1">1</span>
-                <button class="increas" data-tooltip="Збільшити кількість">+</button>
-                <button class="button" data-tooltip="Помічено як куплен">Куплено</button>
-                <button class="esc" data-tooltip="Видалити товар">&#215;</button>
-            </div>            
-
         </div>
         <div class="container-res">
             <h2>Залишилося</h2>
             <hr>
-            <div>
-                <span class="product-item">
-                    Печиво
-                    <span class="amount">2</span>
-                </span>
-                <span class="product-item">
-                    Сир
-                    <span class="amount">1</span>
-                </span>
-            </div>
+            <div id="remaining-list"></div>
             <hr>
             <h2>Куплено</h2>
             <hr>
-            <span class="product-item-1">
-                Помідори
-                <span class="amount-1">2</span>
-            </span>
+            <div id="bought-list"></div>
         </div>
         <div class="badge" id="badge">BuyList</div>
     </div>
-</body>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('search');
+            const button = document.getElementById('but');
+            const productList = document.getElementById('product-list');
+            const remainingList = document.getElementById('remaining-list');
+            const boughtList = document.getElementById('bought-list');
+
+            const updateStatistics = () => {
+                remainingList.innerHTML = '';
+                boughtList.innerHTML = '';
+
+                document.querySelectorAll('.product').forEach(product => {
+                    const name = product.querySelector('.editable').innerText;
+                    const quantity = product.querySelector('.quantity').innerText;
+                    const isBought = product.classList.contains('bought');
+
+                    const item = document.createElement('span');
+                    item.classList.add('product-item');
+                    if (isBought) {
+                        item.classList.add('product-item-1');
+                        item.innerHTML = `${name} <span class="amount-1">${quantity}</span>`;
+                        boughtList.appendChild(item);
+                    } else {
+                        item.innerHTML = `${name} <span class="amount">${quantity}</span>`;
+                        remainingList.appendChild(item);
+                    }
+                });
+            };
+
+            const createProductElement = (name, quantity = 1, bought = false) => {
+                const product = document.createElement('div');
+                product.classList.add('product');
+                if (bought) product.classList.add('bought');
+
+                product.innerHTML = `
+                    <span class="editable">${name}</span>
+                    <button class="dicreas" data-tooltip="Зменшити кількість" ${quantity <= 1 ? 'disabled' : ''}>-</button>
+                    <span class="quantity">${quantity}</span>
+                    <button class="increas" data-tooltip="Збільшити кількість">+</button>
+                    <button class="button" data-tooltip="Помічено як куплене">${bought ? 'Не куплено' : 'Куплено'}</button>
+                    <button class="esc" data-tooltip="Видалити товар">&#215;</button>
+                `;
+
+                product.querySelector('.editable').addEventListener('click', (e) => {
+                    const span = e.target;
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = span.innerText;
+                    input.addEventListener('blur', () => {
+                        span.innerText = input.value;
+                        span.style.display = '';
+                        input.remove();
+                        updateStatistics();
+                    });
+                    span.style.display = 'none';
+                    span.parentNode.insertBefore(input, span);
+                    input.focus();
+                });
+
+                product.querySelector('.dicreas').addEventListener('click', () => {
+                    let qty = parseInt(product.querySelector('.quantity').innerText);
+                    if (qty > 1) {
+                        qty--;
+                        product.querySelector('.quantity').innerText = qty;
+                        product.querySelector('.dicreas').disabled = qty <= 1;
+                        updateStatistics();
+                    }
+                });
+
+                product.querySelector('.increas').addEventListener('click', () => {
+                    let qty = parseInt(product.querySelector('.quantity').innerText);
+                    qty++;
+                    product.querySelector('.quantity').innerText = qty;
+                    product.querySelector('.dicreas').disabled = false;
+                    updateStatistics();
+                });
+
+                product.querySelector('.button').addEventListener('click', () => {
+                    product.classList.toggle('bought');
+                    const isBought = product.classList.contains('bought');
+                    product.querySelector('.button').innerText = isBought ? 'Не куплено' : 'Куплено';
+                    product.querySelector('.dicreas').style.display = isBought ? 'none' : '';
+                    product.querySelector('.increas').style.display = isBought ? 'none' : '';
+                    if (isBought) {
+                        product.querySelector('.esc').style.display = 'none';
+                    } else {
+                        product.querySelector('.esc').style.display = '';
+                    }
+                    updateStatistics();
+                });
+
+                product.querySelector('.esc').addEventListener('click', () => {
+                    product.remove();
+                    updateStatistics();
+                });
+
+                return product;
+            };
+
+            const addProduct = () => {
+                const productName = input.value.trim();
+                if (productName) {
+                    productList.appendChild(createProductElement(productName));
+                    input.value = '';
+                    input.focus();
+                    updateStatistics();
+                }
+            };
+
+            button.addEventListener('click', addProduct);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addProduct();
+                }
+            });
+
+            
+            productList.appendChild(createProductElement('Помідори', 2, true));
+            productList.appendChild(createProductElement('Печиво', 2));
+            productList.appendChild(createProductElement('Сир', 1));
+
+            updateStatistics();
+        });
+    </script>
+</body>
 </html>
